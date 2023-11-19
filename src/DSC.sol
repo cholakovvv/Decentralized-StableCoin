@@ -4,8 +4,6 @@
 
 pragma solidity 0.8.20;
 
-import {SafeERC20} from "../lib/openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
-import {IERC20} from "../lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import {ERC20Burnable} from "../lib/openzeppelin-contracts/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 import {Ownable} from "../lib/openzeppelin-contracts/contracts/access/Ownable.sol";
 import {ERC20} from "../lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
@@ -20,27 +18,38 @@ import {ERC20} from "../lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.s
  *
  * This is the contract meant to be owned by DSCEngine. It is a ERC20 token that can be minted and burned by the DSCEngine smart contract.
  */
- 
+
 contract DSC is ERC20, ERC20Burnable, Ownable {
-    using SafeERC20 for IERC20;
-    
+
+    ///////////////////
+    // Errors        //
+    ///////////////////
+
     error DSC__MustBeGreaterThanZero();
     error DSC__BurnedAmountExceedsBalance();
     error DSC__AddressZero();
     error DecentralizedStableCoin__BlockFunction();
 
-   constructor(string memory name_, string memory symbol_, address initialOwner)
+    ///////////////////
+    // Functions     //
+    ///////////////////
+
+    constructor(string memory name_, string memory symbol_, address initialOwner)
         ERC20(name_, symbol_)
         Ownable(initialOwner)
     {}
 
+    /////////////////////////
+    // Public Functions    //
+    /////////////////////////
+
     function burn(uint256 _amount) public override onlyOwner {
         uint256 balance = balanceOf(msg.sender);
-        
-        if(_amount <= 0) {
+
+        if (_amount <= 0) {
             revert DSC__MustBeGreaterThanZero();
         }
-        if(balance < _amount) {
+        if (balance < _amount) {
             revert DSC__BurnedAmountExceedsBalance();
         }
 
@@ -52,16 +61,16 @@ contract DSC is ERC20, ERC20Burnable, Ownable {
         revert DecentralizedStableCoin__BlockFunction();
     }
 
-    function mint(address _to, uint256 _amount) external onlyOwner returns(bool) {
-        if(_to == address(0)){
+    function mint(address _to, uint256 _amount) external onlyOwner returns (bool) {
+        if (_to == address(0)) {
             revert DSC__AddressZero();
         }
-         if(_amount <= 0) {
+        if (_amount <= 0) {
             revert DSC__MustBeGreaterThanZero();
         }
 
         _mint(_to, _amount);
-        
+
         return true;
     }
 }
